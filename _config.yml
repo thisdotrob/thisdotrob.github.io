@@ -7,7 +7,7 @@
 
 # Site settings
 title: this.rob.blog
-email: robst3@gmail.com
+email: robstevenson000@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   A place to document and share my learnings. Mainly so I can go back and copy paste when I forget how to do something ;)
 baseurl: "" # the subpath of your site, e.g. /blog
