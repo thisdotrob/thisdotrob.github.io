@@ -1,0 +1,37 @@
+---
+layout: post
+title:  "Scrum"
+date:   2017-03-13 20:38:00 +0100
+categories: scrum agile
+published: false
+---
+
+Scrum is an agile software development framework which emphasises an iterative, incremental approach as opposed to a traditional sequential one.
+
+Encourages physical co-location or close online collaboration and daily face to face communication among all team members and disciplines involved.
+
+Acknowledges that customer's requirements are volatile. Accepts this and focuses on maximising the teams ability to deliver quickly and be responsive to changing requirements.
+
+Roles are Product Owner, scrum master and development team.
+
+Product owner represents the stakeholders and is the voice of the customer. Is responsible for a visible, transparent and clear product backlog, and bridging the gap between the stakeholders and the development team. Should not dictate how the team reaches a technical solution.
+
+Scrum master acts as a team facilitator. Ensures the team follows the agreed processes and encourages the team to improve. Is responsible for facilitating team events, coaching the development team in self-organisation and cross functionality, helping remove internal or external impediments to progress, helping the PO maintain the backlog and helping determine the definition of done.
+
+Development team are responsible for delivering potentially shippable increments at the end of each sprint. Made up of 8-9 individuals. Is self organising, sometimes with some interaction with a project management office.
+
+Work in sprints (1-4 weeks).
+
+Sprint planning (time boxed to 4 hours for a 2 week sprint, pro-rata) is split into two halves: first half is spent with the whole team selecting product backlog items which might be achievable in the sprint, second half is spent with just the development team decomposing the work items required to deliver those product backlog items, resulting in the confirmed sprint backlog.
+
+Daily scrum or stand up. All members of the development team come prepared. Starts on time even if some people are missing, should happen at the same time and place every day. Is timeboxed to 15 minutes. Each team member answers 3 questions: What did I do yesterday to help the team meet the sprint goal? What will I do today to help the team achieve the sprint goal? Do I see any impediment that prevents me or the Development Team from meeting the spring goal? Any impediments should be captured and an agreed person designated to work towards a resolution. No detailed discussions should occur during daily scrum.
+
+Sprint review occurs at the end of the sprint. Involves reviewing work done and not done, and presenting completed work to stakeholders. Timeboxed to 2 hours for a 2 week sprint.
+
+Sprint retrospective occurs at the end of the sprint. Team identifies and agrees on continuous process improvement actions by answering two main questions: What went well during the sprint? What could be improved in the next sprint? Timeboxed to 1.5 hours for a 2 week sprint.
+
+Work items selected for the sprint backlog should not be changed during the sprint (why?).
+
+Focus on quality - avoid defects. Reducing WIP achieves this.
+
+Releasing quality frequently builds trust with upstream and downstream partners. So we should aim to do so.

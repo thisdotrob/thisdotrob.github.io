@@ -1,0 +1,44 @@
+---
+layout: post
+title:  "Kanban"
+date:   2017-03-14 08:41:00 +0100
+categories: kanban agile
+published: false
+---
+
+Has roots in just in time inventory management pioneered by Toyota in 1940s.
+
+Balances demands for work with the availability of capacity for new work. Matches amount of WIP to the team's capacity.
+
+Focuses on the work which meets the customer's needs rather than individuals activities.
+
+No specialists on the team - it is the entire team's responsibility to ensure the work is moving smoothly through the process.
+
+6 general practices:
+  1. Visualisation (kanban board allows better understanding of work and workflows)
+  2. Limiting WIP (reduce waste from context switching and multitasking)
+  3. Flow management (?)
+  4. Making policies explicit (?)
+  5. Using feedback loops (?)
+  6. Collaborative experimental evolution (?)
+
+Limits WIP in order to reduce waste from context switching, multitasking and bottlenecks. Can apply limits of work items in each workflow state (e.g. max 2 items in Code Review) to highlight and combat bottleneck areas.
+
+Allows more flexible planning options:
+  - Team focus only on WIP, as soon as they are done they pick another work item from the top of the backlog.
+  - Product owner is free to re-prioritise backlog without disrupting the team.
+  - As long as prioritisation is kept correct, with most crucial work items are kept at the top of the backlog, development team is assured that they are delivering maximum value to the business, and no fixed-length iterations are required.
+
+The methodology relies on full transparency of work and real-time communication of capacity, therefore the Kanban board must be the single source of truth for the team's work.
+
+Forecasting is facilitated by monitoring the cycle time (time it takes for a unit of work to travel through the team's workflow).
+
+Cycle time can be optimised by:
+  - Creating overlapping skill sets through mentoring and code review, allowing developers to take on heterogenous work.
+  - If there is a backup of work, the whole team can then swarm on the problem to get the process flowing smoothly again.
+
+Kanban cards should have:
+  - who is responsible for the work
+  - a brief description of the job being done,
+  - how long it is estimated to take
+  - other technical details valuable to the assignee
