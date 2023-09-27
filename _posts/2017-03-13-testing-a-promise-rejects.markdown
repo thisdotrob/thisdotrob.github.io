@@ -3,6 +3,7 @@ layout: post
 title:  "Testing that a promise rejects in Javascript"
 date:   2017-03-13 20:38:00 +0100
 categories: unit testing mocha promises
+published: false
 ---
 
 I came across a typical unit test case today which I have covered many a time before: testing that a promise returning function rejects under a certain scenario.

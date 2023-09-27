@@ -3,6 +3,7 @@ layout: post
 title:  "Using ES6 native promises with the official Node MongoDB driver"
 date:   2016-05-25 10:44:47 +0100
 categories: node mongodb promises
+published: false
 ---
 
 Lets start by making a simple server with express that has a single POST route which takes in a json string representing a book, parses it with the bodyParser middleware and returns it:
