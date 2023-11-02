@@ -32,17 +32,23 @@ My first attempt left the notes exactly as I had written them and simply added d
   - etc...
 ```
 This works okay for the scenario when I remember the chapter that contains the info I want to retrieve - I just search Logseq for "The Rust Programming Language Chapter 4" or "The Rust Programming Language Understanding Ownership" and the page tag will appear at the top of the results. Click that result and I'm taken to the page and can see the linked reference containing the sub-blocks with the info I need. But if the chapter contains a lot of information, not just on the topic I'm interested in, then the linked references will be too noisy. If I want to retrieve information about the garbage collector which I remember was in Chapter 4 then I can't simply search Logseq for "The Rust Programming Language Chapter 4 garbage collector" - Logseq search isn't good enough to surface the block I need. Even adding quotes around the separate search terms ("The Rust Programming Language..." and "garbage collector" doesn't help). To find specific information like this I found that a Logseq query was necessary:
+
+{% raw %}
 ```
-{{query (AND [[The Rust Programming Language - Chapter 4 'Understanding Ownership']] [[garbage collector]]) }}
+{{query (AND [[The Rust Programming Language - Chapter 4 'Understanding Ownership']] [[garbage collector]])}}
 ```
+{% endraw %}
+
 Whilst Logseq helps by offering auto-complete for the tags after you've opened the double square brackets and start typing, this is still a lot more time consuming that using Logseq's standard search.
 
 I also tried getting Logseq queries to perform fuzzy search. For example what if sometimes the topic was tagged as `[[garbage collection]]`, sometimes as `[[garbage collector]]` and sometimes as `[[garbage collecting]]`? I tried the following but it didn't return any results:
+{% raw %}
 ```
 {{query "garbage collect*"}}
 
 {{query [[garbage collect*]]}}
 ```
+{% endraw %}
 I took a quick look at Logseq docs but couldn't easily surface an an answer for how to perform fuzzy searching so at this point decided to ditch using Logseq queries and restructure the notes instead. My aim being to allow searching (using normal Logseq search) for single tags for the main keywords only and then easily fold and unfold to reduce noise. This has left a structure which is a lot more heirarchical than I understood was desirable with Logseq, so I'm sure there's a better way but right now I need to keep on track with my learning plan for Rust and don't want to get side tracked.
 
 This is the tagging structure I've ended up with:
