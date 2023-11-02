@@ -2,8 +2,6 @@
 layout: post
 title:  "Learning Rust"
 date:   2023-09-27 17:42:00 +0100
-categories: rust
-published: true
 ---
 
 Since leaving Shopify I've had 4 months of funemployment during which I've prioritised spending time with family and travelling. It's given me the space I needed to work out what I love about coding and what makes me passionate about it. My journey so far has seen me use a variety of languages but there's a long standing itch that I still haven't been able to scratch - working with a low level language on projects where performance is crucial.

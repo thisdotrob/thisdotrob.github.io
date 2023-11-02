@@ -2,8 +2,6 @@
 layout: post
 title:  "Using Logseq for programming language notes"
 date:   2023-10-16 14:33:01 +0100
-categories: rust
-published: true
 ---
 
 I've been using Logseq for nearly a couple of years now as my sole note taking application. Prior to that I've used a number of different apps, most recently Obsidian. I switched from Obsidian begrudgingly at first because Shopify removed Obsidian from the approved list of programs we could run on our work MacBooks. Because the focus was on moving all my notes from Obsidian to Logseq as quickly as possible I didn't have much time to read up on the correct way to use Logseq at the time, so my workflow has evolved naturally as I've made notes, tried to retrieve and use them and come across difficulties which I then fix.
