@@ -20,7 +20,7 @@ The lower-level language I've picked to learn is Rust for the following reasons:
 - it's modern but established with a seemingly great community and ecosystem,
 - it's not just used for hardcore low level programming so my previous experience could flatten the learning curve,
 - aside from c++ it looks to have the most active job market,
-- it seems to offer maximal productivity for a lot of applications by providing the expressiveness, ergonomics and great compiler feedback needed to write code quickly _and_ the safety, reliability and performance needed to minimise future fettling once it's "finished" and running.
+- it seems to offer maximal productivity for a lot of applications by providing the expressiveness, ergonomics and great compiler feedback needed to write code quickly _and_ the safety, reliabigit lity and performance needed to minimise future fettling once it's "finished" and running.
 
 Having seen the eye watering costs incurred in terms of dev time and running infrastructure at previous employers that used higher level languages it almost seems like a no-brainer choice of language if Rust's promises hold true. I know that the productivity promises of those higher level languages tend not to. On a less serious note I also love that Rust has a crab mascot, Ferris, since I consider myself a bit crablike (probably due to the [Barnum Effect](https://en.wikipedia.org/wiki/Barnum_effect) and being told I'm a good example of my Cancer star sign). The Rust logo [featuring a bicycle chainring](https://bugzilla.mozilla.org/show_bug.cgi?id=680521) also appeals to me as a two wheel nut.
 
