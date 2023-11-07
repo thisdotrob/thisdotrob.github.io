@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Rust Project Choice"
+title:  "Rust project choice"
 date:   2023-10-18 13:14:32 +0100
 ---
 

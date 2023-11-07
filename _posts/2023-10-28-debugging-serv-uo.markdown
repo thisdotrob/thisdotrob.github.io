@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Debugging Serv UO"
+title:  "Debugging ServUO"
 date:   2023-10-28 14:26:41 +0100
 ---
 
