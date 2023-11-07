@@ -56,6 +56,13 @@ The handler finds the corresponding gump instance using the serial and type ID a
 
 The `resurrect()` method sets the instance's hit points attribute to 10 and then registers a delta to be processed. The delta has a flag of "4", which means it is a hit points delta. The delta flag is registered by using a bitwise OR operation on the flag and the instance's `DeltaFlags` attribute. The attribute starts off as a 32 bit zero value. Applying bitwise OR to it with the hit points delta flag of "4" (`100`) leaves the attribute with a `1` bit in the third from right position. Other flags have values that correspond to unique digits in the `DeltaFlags` attribute e.g. the mana points delta flag is "8" (`1000`) and the stamina points flag is "16" (`10000`). This means the `DeltaFlags` attribute could be set to `11100` indicating there are three deltas to process: stamina, mana and hit points.
 
+Storing the delta flags as a 32 bit integer like this gives the following benefits over storing each possible flag as it's own private instance variable:
+  - more memory efficient
+  - faster to read and update
+  - less verbose code needed for reading and updating (can easily set multiple flags at the same time by setting the RHS of the bitwise OR operation to the correct number)
+
+The trade-off is that the code is less straightforward to understand, and care needs to be taken to set the flag values properly to avoid clashes which would incorrectly set flags.
+
 After the flag has been registered, the character's `Mobile` instance is added to a list of instances for which deltas need to be processed (one of the delta queues mentioned earlier). A signal is sent to the `main()` function which triggers the restart of its loop. This loop removes each `Mobile` instance in the delta queue and calls the `ProcessDelta()` method on it. This method inspects the `DeltaFlags` attribute to decide what packets should be queued for sending back to the client. In this example, `DeltaFlags` indicates a `MobileHits` packet should be queued for sending. The constructed packet has packet ID 161, which is written first. Next comes the serial of the player's character, then the max hit points and lastly the new hit points (10).
 
 The client receives this `MobileHits` packet and updates the hit points displayed in game.
