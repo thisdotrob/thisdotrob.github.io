@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Debugging ServUO"
-date:   2023-10-28 14:26:41 +0100
+date:   2023-10-25 14:26:41 +0100
 ---
 
 After getting [ServUO](https://github.com/ServUO/ServUO/) running locally I wanted to start looking over the code for inspiration for my Rust implementation. I started reviewing the code using Neovim but there were so many files and layers of indirection that it was really hard going. I needed to set up an IDE that would allow me to jump around the code efficiently and attach a debugger to the running server to observe the data flowing through it.

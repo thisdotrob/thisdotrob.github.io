@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "ServUO code review"
-date:   2023-10-29 12:18:07 +0100
+date:   2023-10-27 12:18:07 +0100
 ---
 
 I've spent the last few days looking through the [ServUO]() code to understand how the server works. It's been tough going as I'm not familiar with C#, there's zero documentation and it is a pretty complicated project. It's also a HUGE project. I'm in awe that the authors have been able to build a server emulator for such a complicated and feature filled game. I'm not sure if ServUO was built from scratch or based on a previous UO server emulator, but at some point there was a first server emulator that was built purely based on knowledge of how the game worked from playing it and presumably by inspecting packets set from client to server. Building it must have taken an insane amount of hours and I think that is testament to how passionate people are about the game and keeping it alive.

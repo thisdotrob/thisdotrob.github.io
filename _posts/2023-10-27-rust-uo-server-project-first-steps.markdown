@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Rust UO server first steps"
-date:   2023-10-30 11:44:00 +0100
+title:  "Rust UO server project first steps"
+date:   2023-10-27 19:44:00 +0100
 ---
 
 Now I've finished reviewing the ServUO code, I'm ready to get started on my Rust UO server implementation.

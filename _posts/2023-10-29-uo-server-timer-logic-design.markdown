@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "UO server timer logic design"
-date:   2023-10-31 18:00:00 +0100
+date:   2023-10-29 18:00:00 +0100
 ---
 
 Today I've been thinking about a design for the timer logic in my Rust UO server implementation. I took a more detailed look at the timer logic in ServUO and made the following diagrams on my whiteboard to fully grok it:
