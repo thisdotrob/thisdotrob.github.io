@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Rust Ultima Online server project - adding callbacks to a struct in Rust"
+title:  "Rust UO server project pt3: Adding Timer Callbacks"
 date:   2023-10-31 18:00:00 +0100
 ---
 

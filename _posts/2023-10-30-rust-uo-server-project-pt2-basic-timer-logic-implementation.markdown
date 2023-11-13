@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Rust Ultima Online server project - basic timer logic"
+title:  "Rust UO server project pt2: Basic Timer Logic Implementation"
 date:   2023-10-30 18:00:00 +0100
 ---
 

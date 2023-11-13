@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Rust Ultima Online server project - making callbacks thread safe"
+title:  "Rust UO server project pt4: Making Timer Callbacks Threadsafe"
 date:   2023-11-04 18:00:00 +0000
 ---
 

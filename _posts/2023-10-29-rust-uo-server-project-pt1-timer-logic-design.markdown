@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "UO server timer logic design"
+title:  "Rust UO server project pt 1: Timer Logic Design"
 date:   2023-10-29 18:00:00 +0100
 ---
 
