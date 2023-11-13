@@ -2,6 +2,7 @@
 layout: post
 title:  "The Rust Book"
 date:   2023-10-11 17:03:00 +0100
+tags: ["Rust", "Books"]
 ---
 
 I've finished the first step of my Rust learning plan, reading "The Rust Programming Language" a.k.a "The Rust Book". It's great that Rust has an "official" book that strikes the balance well between being accessible enough for newcomers to the language while also going into depth on and covering most of the features of the language. It made starting out a lot easier as there was no confusion about *where* to start, the decision was made quickly once I saw that the official book was recommended a bunch.

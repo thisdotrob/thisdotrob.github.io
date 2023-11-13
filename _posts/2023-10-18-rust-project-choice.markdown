@@ -2,6 +2,7 @@
 layout: post
 title:  "Rust project choice"
 date:   2023-10-18 13:14:32 +0100
+tags: ["Rust", "UO server project"]
 ---
 
 Today I've come up with a plan for a Rust project that I'm very excited about. I'm going to build an Ultima Online server.

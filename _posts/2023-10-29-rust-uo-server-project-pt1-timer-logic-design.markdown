@@ -1,7 +1,8 @@
 ---
 layout: post
-title:  "Rust UO server project pt 1: Timer Logic Design"
+title:  "Rust UO server project pt1: Timer Logic Design"
 date:   2023-10-29 18:00:00 +0100
+tags: ["UO server project", "Rust"]
 ---
 
 Today I've been thinking about a design for the timer logic in my Rust UO server implementation. I took a more detailed look at the timer logic in ServUO and made the following diagrams on my whiteboard to fully grok it:

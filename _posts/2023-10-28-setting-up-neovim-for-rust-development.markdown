@@ -2,6 +2,7 @@
 layout: post
 title:  "Setting up Neovim for Rust development"
 date:   2023-10-28 18:00:00 +0100
+tags: ["Rust", "Neovim"]
 ---
 
 Before starting on my Rust UO server implementation I needed to set up my editor to allow me to be as productive as possible. I've been using Neovim for a couple of years now but hadn't bothered setting it up properly for Rust until now as I'd only been playing around with noddy example code while reading The Rust Book.

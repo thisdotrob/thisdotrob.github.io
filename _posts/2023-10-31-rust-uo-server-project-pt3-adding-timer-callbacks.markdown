@@ -2,6 +2,7 @@
 layout: post
 title:  "Rust UO server project pt3: Adding Timer Callbacks"
 date:   2023-10-31 18:00:00 +0100
+tags: ["UO server project", "Rust"]
 ---
 
 Today I've carried on working on the timer logic in my Ultima Online server implementation project. Previously the logic only displayed progress bars that incremented as each repetition of a timer was run. Next I needed to implement functionality to allow some arbitrary code to be run when a timer is executed. This is the whole point of having timers - execute some logic at a certain time or at certain intervals.

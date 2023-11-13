@@ -2,6 +2,7 @@
 layout: post
 title:  "Getting ServUO running"
 date:   2023-10-20 09:55:51 +0100
+tags: ["ServUO", "UO server project"]
 ---
 
 I've spent the last few days pouring over the [ServUO Ultima Online server emulator](https://github.com/ServUO/ServUO/) code.

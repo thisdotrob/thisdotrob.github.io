@@ -2,9 +2,10 @@
 layout: post
 title:  "Rust UO server project pt4: Making Timer Callbacks Threadsafe"
 date:   2023-11-04 18:00:00 +0000
+tags: ["UO server project", "Rust"]
 ---
 
-As mentioned at the end of my [last journal post]({% post_url 2023-10-31-rust-ultima-online-server-project-2 %}), attempting to send a `Timer` struct between threads after a `callback` property had been added it to it did not compile. This post explores the compiler errors seen when passing `Timer` structs between threads after adding callbacks to them, and how to fix them. In my current implementation, `Timer` structs need to be sent between threads using both an mpsc channel and a shared vec wrapped in a `Mutex`. Channels are used when sending timers to the registration thread, and from the prioritisation thread to the execution thread. The shared vec `Mutex` is used when timers are being transferred from the registration thread to the prioritisation thread.
+As mentioned at the end of my [last journal post]({% post_url 2023-10-31-rust-uo-server-project-pt3-adding-timer-callbacks %}), attempting to send a `Timer` struct between threads after a `callback` property had been added it to it did not compile. This post explores the compiler errors seen when passing `Timer` structs between threads after adding callbacks to them, and how to fix them. In my current implementation, `Timer` structs need to be sent between threads using both an mpsc channel and a shared vec wrapped in a `Mutex`. Channels are used when sending timers to the registration thread, and from the prioritisation thread to the execution thread. The shared vec `Mutex` is used when timers are being transferred from the registration thread to the prioritisation thread.
 
 ### Using function pointers for the callback
 

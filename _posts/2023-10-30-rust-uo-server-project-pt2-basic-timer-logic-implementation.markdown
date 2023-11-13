@@ -2,6 +2,7 @@
 layout: post
 title:  "Rust UO server project pt2: Basic Timer Logic Implementation"
 date:   2023-10-30 18:00:00 +0100
+tags: ["UO server project", "Rust"]
 ---
 
 I've finished v1 of the Rust UO server timer logic. The logic covers:
