@@ -31,7 +31,11 @@ pub fn start() { // <-- called from the server's main() function
 
 The code above will simply print out any bytes received from a connected client on the UO port. `:#04X?` in the format string means it will print the hexadecimal representation of the data.
 
-Next I started the game client ([ClassicUO](https://github.com/ClassicUO/ClassicUO)) and attempted to log in, then checked what packets were received:
+Next I started the game client ([ClassicUO](https://github.com/ClassicUO/ClassicUO)) and attempted to log in from this first screen:
+
+![rust_uo_server_pt5_0.png](/assets/rust_uo_server_pt5_0.png)
+
+Then checked what packets were received:
 
 ```
 [
@@ -251,4 +255,8 @@ The lifetime parameter is needed on `read_string()` because the compiler does no
 
 ### Next steps
 
-At this point the game client was stuck because it was expecting packets sent back. Next I'll be looking at working out what these should be and adding the code to send them.
+At this point the game client was stuck because it was expecting packets sent back:
+
+![rust_uo_server_pt5_1.png](/assets/rust_uo_server_pt5_1.png)
+
+Next I'll be looking at working out what these should be and adding the code to send them.
