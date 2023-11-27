@@ -17,3 +17,5 @@ github_username:  thisdotrob
 
 # Build settings
 markdown: kramdown
+exclude:
+  - "rust-jekyll-publisher"
