@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Rust UO server project pt1: Timer Logic Design</title>
+  <meta name="description" content="Today I’ve been thinking about a design for the timer logic in my Rust UO server implementation. I took a more detailed look at the timer logic in ServUO and...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://yourdomain.com/2023/10/29/rust-uo-server-project-pt1-timer-logic-design.html">
+  <link rel="alternate" type="application/rss+xml" title="this.rob.journal" href="http://yourdomain.com/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">this.rob.journal</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+          <a class="page-link" href="/about">About</a>
+          <a class="page-link" href="/tags">Tags</a>
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Rust UO server project pt1: Timer Logic Design</h1>
+    <p class="post-meta"><time datetime="2023-10-29T17:00:00+00:00" itemprop="datePublished">Oct 29, 2023</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>Today I’ve been thinking about a design for the timer logic in my Rust UO server implementation. I took a more detailed look at the timer logic in ServUO and made the following diagrams on my whiteboard to fully grok it:</p>
+
+<p><img src="/assets/image_1698346145359_0.png" alt="ServUO_timer_logic_diagram.png" /></p>
+
+<p><img src="/assets/image_1698348649812_0.png" alt="ServUO_timer_logic_diagram_2.png" /></p>
+
+<p>After exploring diagrammatically I realised that the timer logic in ServUO is not as complicated as the code makes it seems. I think the OO implementation involves so many layers of indirection and state being passed around that a <em>lot</em> of jumping around code is needed to piece the logic together.</p>
+
+<p>Once I’d plotted out the data structures and logic used at a level that ignores the language specific implementation details the simplicity of the design came through:</p>
+<ul>
+  <li>any time a timer is started for the first time or modified, a <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code> is created and pushed to a list (<code class="language-plaintext highlighter-rouge">m_Changed</code>)</li>
+  <li>each <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code> has a reference to the <code class="language-plaintext highlighter-rouge">Timer</code> it relates to</li>
+  <li>creating / modifying timers and pushing corresponding <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code>s to the <code class="language-plaintext highlighter-rouge">m_Changed</code> list happens in the main thread, using a lock on <code class="language-plaintext highlighter-rouge">m_Changed</code></li>
+  <li>in another thread (the “timer” thread), <code class="language-plaintext highlighter-rouge">m_Changed</code> is periodically cleared out under lock, with the <code class="language-plaintext highlighter-rouge">Timer</code> referenced by each <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code> removed being pushed or removed from another list, <code class="language-plaintext highlighter-rouge">m_Timers</code></li>
+  <li><code class="language-plaintext highlighter-rouge">m_Timers</code> is a list of lists - each sub list corresponding to a priority category of timers. Timers are pushed and removed from the correct sub list according to the priority number set on the <code class="language-plaintext highlighter-rouge">Timer</code> instance</li>
+  <li>Once the timer thread has processed all of the <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code>s have been processed and <code class="language-plaintext highlighter-rouge">m_Timers</code> updated, it proceeds to check the timers in <code class="language-plaintext highlighter-rouge">m_Timers</code>, under lock, to see if any are due to run</li>
+  <li>Any that are due to be run are removed from <code class="language-plaintext highlighter-rouge">m_Timers</code> and pushed to another list, <code class="language-plaintext highlighter-rouge">m_Queued</code>, under lock</li>
+  <li>Back in the main thread a lock is acquired over <code class="language-plaintext highlighter-rouge">m_Queued</code> and each timer is dequeued and has it’s associated callback called to perform the logic that should be run on the current tick</li>
+</ul>
+
+<p>I then thought about how similar logic could be implemented in Rust. I started by listing out the properties a <code class="language-plaintext highlighter-rouge">Timer</code> should have, assuming it would be implemented as a struct:</p>
+
+<h3 id="timer-struct-properties"><code class="language-plaintext highlighter-rouge">Timer</code> struct properties</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">callback</code> - the logic to execute when the timer elapses (can make this a string to print to begin with)</li>
+  <li><code class="language-plaintext highlighter-rouge">repetitions</code> - how many times to repeat the timer</li>
+  <li><code class="language-plaintext highlighter-rouge">interval</code> - how many milliseconds to wait between repetitions</li>
+  <li><code class="language-plaintext highlighter-rouge">delay</code> - how long to wait until the first call</li>
+  <li><code class="language-plaintext highlighter-rouge">next</code> - the next tick that the timer is due to run on</li>
+  <li><code class="language-plaintext highlighter-rouge">count</code> - how many times the timer has elapsed so far</li>
+  <li><code class="language-plaintext highlighter-rouge">priority</code> - how often (via which timer bucket) to check whether it should be queued (could skip priority buckets to begin with)</li>
+  <li><code class="language-plaintext highlighter-rouge">queued</code> - whether the timer has been queued to have its <code class="language-plaintext highlighter-rouge">callback</code> executed, so that only one of each timer can be queued at a time</li>
+</ul>
+
+<p>To simplify as much as possible for my first go at hacking this logic together I’m going to skip the following properties:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">callback</code> - setting closures or functions as a property value in a Struct seems to be fairly complicated and there are a number of different approaches I need to read up on. All I want to do first is have some timer logic that is capable of prioritising timers and has the ability to dequeue them at the correct time. As long as I can prove this is being done correctly it doesn’t matter what logic is actually performed when a timer runs, for now. Instead of <code class="language-plaintext highlighter-rouge">callback</code> I’ll add a <code class="language-plaintext highlighter-rouge">name</code> property to the <code class="language-plaintext highlighter-rouge">Timer</code> struct and will print the name out and the current tick count to prove the timers are running when they should.</li>
+  <li><code class="language-plaintext highlighter-rouge">delay</code> - for now I can just use <code class="language-plaintext highlighter-rouge">interval</code> as the initial delay.</li>
+  <li><code class="language-plaintext highlighter-rouge">priority</code> - for now I’ll skip creating separate buckets for each priority category of timer and just have all timers prioritised equally</li>
+  <li><code class="language-plaintext highlighter-rouge">queued</code> - for now I’ll skip this property and just allow the same timer to be queued multiple times if that happens</li>
+</ul>
+
+<p>Next I looked at the <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code> in the ServUO implementation to try and understand if it was necessary. The logic would be simpler if this data type and the associated data structure (<code class="language-plaintext highlighter-rouge">m_Changed</code>) could be removed. New and changed timers would need to be pushed straight into the main <code class="language-plaintext highlighter-rouge">timers</code> list instead. The trade-off here is in making sure that the 3 main pieces of logic do not make each other pause for longer than is necessary.</p>
+
+<p>The 3 main pieces of logic are:</p>
+<ul>
+  <li>Registering timers (creating and updating them)</li>
+  <li>Prioritising timers (setting their priority bucket and next run time)</li>
+  <li>Selecting and executing timers (according to their priority bucket and next run time)</li>
+</ul>
+
+<p>I explored 3 different approaches for splitting this logic across threads with shared ownership of data structures:</p>
+
+<h3 id="three-threads-approach-with-a-mutext-wrapped-vector-of-timer-structs">Three threads approach with a <code class="language-plaintext highlighter-rouge">Mutex&lt;T&gt;</code> wrapped vector of <code class="language-plaintext highlighter-rouge">Timer</code> structs</h3>
+<p>This approach would have a separate thread for each of the main pieces of logic and a single, shared ownership, vector of <code class="language-plaintext highlighter-rouge">Timer</code> structs.</p>
+
+<p>A “timer registration thread” would receive args for new or changed timers via an MPSC channel. It would create <code class="language-plaintext highlighter-rouge">Timer</code> structs using these args. It would then push newly created <code class="language-plaintext highlighter-rouge">Timer</code> structs to a <code class="language-plaintext highlighter-rouge">timers</code> vector under lock.</p>
+
+<p>A “timer prioritisation thread” would iterate over the <code class="language-plaintext highlighter-rouge">Timer</code> structs in the <code class="language-plaintext highlighter-rouge">timers</code> vector, also under lock. It would inspect each timer and send any that are due to be run via MPSC channel to the third thread. Any that are not due to be run would be left in the vector to be checked later. If there are repetitons left to perform on any timers sent to the third thread, a new timer registration for the next repetition is triggered by sending updated args back to the first thread via channel.</p>
+
+<p>The last thread would be a “timer executor thread”. It would receive <code class="language-plaintext highlighter-rouge">Timer</code> structs due to be run via MPSC channel from the timer prioritisation thread. For each received it would run that <code class="language-plaintext highlighter-rouge">Timer</code>’s callback.</p>
+
+<p>Ownership of the <code class="language-plaintext highlighter-rouge">timers</code> vec would be shared between the timer registration thread and the timer prioritisation thread. Each would acquire a lock on the vec to do its work. This would mean that while timers were being registered they would not be able to be prioritised. Timer prioritisation needs to happen once on each tick, so a blocking delay equal to the length of one tick could be added to the timer prioritisation thread. This would create a period between each tick when the <code class="language-plaintext highlighter-rouge">timers</code> vec was not locked by the timer prioritisation thread and the timer registration thread could acquire a lock to register new timers.</p>
+
+<p>The potential problem here is if the logic in the timer prioritisation thread is not fast enough and timer registrations back up because the lock over <code class="language-plaintext highlighter-rouge">timers</code> cannot be acquired by the registration thread for long enough. I think this is why the ServUO implementation uses another data structure (<code class="language-plaintext highlighter-rouge">m_Changed</code>) - to minimise the amount of time spent waiting for a lock by the registration logic.</p>
+
+<h3 id="two-threads-approach-with-no-shared-ownership-of-the-vector-of-timer-structs">Two threads approach with no shared ownership of the vector of <code class="language-plaintext highlighter-rouge">Timer</code> structs</h3>
+<p>This approach would use a “timer manager thread” and a “timer executor thread”. They would use channels to communicate and a single <code class="language-plaintext highlighter-rouge">timers</code> vec, owned by the manager thread.</p>
+
+<p>The timer manager thread would alternate between receiving timers to register via a channel and registering them, and checking registered timers to send for execution (again via channel).</p>
+
+<p>The timer executor thread would receive timers ready for execution and run their callbacks.</p>
+
+<p>To alternate between registering and queuing for execution, the timer manager thread could use the <code class="language-plaintext highlighter-rouge">recv_deadline</code> channel method to spend an amount of time receiving args from the channel. Args received would be used to create <code class="language-plaintext highlighter-rouge">Timer</code> structs which would then be pushed onto a <code class="language-plaintext highlighter-rouge">timers</code> vec. After the deadline elapses the thread would stop receiving args and start checking through the <code class="language-plaintext highlighter-rouge">Timer</code> structs in the vec for any that are due to be run. Any that are due to be run would be sent to the executor thread. If there are still repetitions left for a timer that was just sent, the thread would need to construct a new <code class="language-plaintext highlighter-rouge">Timer</code> struct and add it to the <code class="language-plaintext highlighter-rouge">timers</code> vec.</p>
+
+<p>The potential problem with this approach is similar to that for the previous approach. No registration of new timers is possible for the entire time that timers are being checked and sent for execution. Even worse, re-registration of timer repetitions also needs to be done before any new timers can be registered. Again, introducing a second data structure to record new timers to be added would pause registrations only for the amount of time needed to iterate over that second data structure and move the elements into the <code class="language-plaintext highlighter-rouge">timers</code> vec.</p>
+
+<h3 id="three-threads-approach-with-a-mutext-wrapped-new_timers-vector-of-timer-structs">Three threads approach with a <code class="language-plaintext highlighter-rouge">Mutex&lt;T&gt;</code> wrapped <code class="language-plaintext highlighter-rouge">new_timers</code> vector of <code class="language-plaintext highlighter-rouge">Timer</code> structs</h3>
+<p>This approach introduces a second vector of <code class="language-plaintext highlighter-rouge">Timer</code> structs, containing timers that are new and need to be prioritised. Three threads would be needed:</p>
+
+<p>A “timer registration thread” would receive timer args via channel, construct a <code class="language-plaintext highlighter-rouge">Timer</code> struct with them and add them to a <code class="language-plaintext highlighter-rouge">new_timers</code> vec under lock.</p>
+
+<p>A “timer prioritisation thread” would consume the <code class="language-plaintext highlighter-rouge">new_timers</code> vec under lock. Each <code class="language-plaintext highlighter-rouge">Timer</code> struct consumed would be moved into a <code class="language-plaintext highlighter-rouge">timers</code> vec, into the correct priority sub list. After consuming the <code class="language-plaintext highlighter-rouge">new_timers</code> vec, the thread would iterate over the <code class="language-plaintext highlighter-rouge">timers</code> vec and remove any timers that are due to run. Removed timers would be sent via channel to the third thread for execution. If removed timers have repetitions still to run, args would be constructed for the next run and sent to the first thread via channel for re-registration.</p>
+
+<p>A “timer execution thread” would receive timers to execute and run their callbacks.</p>
+
+<p>Timer registration will only be paused for as long as the timer prioritisation thread takes to consume the <code class="language-plaintext highlighter-rouge">new_timers</code> vec under lock, which should be very quick.</p>
+
+<h3 id="design-decision">Design decision</h3>
+<p>I’m going to go with the third approach above since it should offer the best performance. It is similar to the approach taken in the ServUO implementation, with the following differences:</p>
+<ul>
+  <li>A single <code class="language-plaintext highlighter-rouge">Timer</code> type, rather than having a <code class="language-plaintext highlighter-rouge">Timer</code> type and <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code> type. The <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code> type seems like a wrapper around a <code class="language-plaintext highlighter-rouge">Timer</code> which serves little purpose other than indicating that the <code class="language-plaintext highlighter-rouge">Timer</code> is new and needs to be registered. This information is duplicated in the name of the data structure (<code class="language-plaintext highlighter-rouge">m_Changed</code>) that holds the <code class="language-plaintext highlighter-rouge">TimerChangedEvent</code> instances in the ServUO implementation. In my Rust implementation I will use only a <code class="language-plaintext highlighter-rouge">Timer</code> struct, and rely on the name of the vec that holds new instances (<code class="language-plaintext highlighter-rouge">new_timers</code>) to differentiate between timers that need to be registered and timers that have been registered and priortised.</li>
+  <li>Immutable timer instances. ServUO uses a single <code class="language-plaintext highlighter-rouge">Timer</code> instance to execute multiple repetitions of a timer. This instance is passed back and forth between threads and needs to keep its own reference to the priority list it is currently assigned to to make this work. Creating a <code class="language-plaintext highlighter-rouge">Timer</code> struct instance for each repetition instead keeps the code simpler and shouldn’t affect performance much, assuming creating a struct is cheap. I might need to revisit this in the future but as a starting point I think it makes sense to more easily keep the borrow checker happy.</li>
+</ul>
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">this.rob.journal</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li><a href="mailto:this.rob@protonmail.com">this.rob@protonmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/thisdotrob"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">thisdotrob</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/thisdotrob"><span class="icon icon--twitter"><svg viewBox="0 0 16 16"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">thisdotrob</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>A place to document and share my explorations in coding. Mainly so I can go back and copy paste when I forget how to do something ;)
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
